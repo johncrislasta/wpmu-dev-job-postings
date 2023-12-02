@@ -2,7 +2,7 @@
 /*
 Plugin Name: Job Postings Plugin
 Description: A simple WordPress plugin with a custom table for storing job postings.
-Version: 1.0.2
+Version: 1.0.3
 Author: John Cris Lasta
 */
 
@@ -27,7 +27,7 @@ function job_postings_plugin_activation(): void {
 
 // Shortcode to display a form for job postings
 add_shortcode( 'job_posting_form', 'job_posting_form_shortcode' );
-function job_posting_form_shortcode(): bool|string {
+function job_posting_form_shortcode(): string {
 	ob_start();
 	?>
 	<form method="post">
@@ -60,7 +60,7 @@ function job_posting_form_shortcode(): bool|string {
 
 // Shortcode to display job postings with search functionality
 add_shortcode( 'display_job_postings', 'display_job_postings_shortcode' );
-function display_job_postings_shortcode(): bool|string {
+function display_job_postings_shortcode(): string {
 	ob_start();
 	?>
 	<form method="get">

@@ -34,9 +34,7 @@ class Job_Postings_API {
 			array(
 				'methods'             => 'GET',
 				'callback'            => array( $this, 'select_job_postings' ),
-				'permission_callback' => function () {
-					return current_user_can( 'read' );
-				},
+				'permission_callback' => '__return_true',
 			)
 		);
 	}
@@ -44,7 +42,7 @@ class Job_Postings_API {
 	/**
 	 * Inserts the submitted job posting
 	 *
-	 * @param array $data An array containing job_title and job_description keys.
+	 * @param WP_REST_Request $data An array containing job_title and job_description keys.
 	 *
 	 * @return array
 	 */
@@ -53,6 +51,13 @@ class Job_Postings_API {
 		$table_name      = $wpdb->prefix . 'job_postings';
 		$job_title       = sanitize_text_field( $data['job_title'] );
 		$job_description = sanitize_textarea_field( $data['job_description'] );
+
+		if ( empty( $job_title ) || empty( $job_description ) ) {
+			return array(
+				'success' => false,
+				'message' => "Job title or description can't be empty",
+			);
+		}
 		$wpdb->insert(
 			$table_name,
 			array(
