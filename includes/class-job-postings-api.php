@@ -1,14 +1,27 @@
 <?php
+
+namespace WPMU_Dev;
+
+use WPMU_Dev\Models\Job_Postings_Model;
+
 /**
  * Extends WordPress REST API to expose Insert and Select
  */
 class Job_Postings_API {
 
 	/**
+	 * @var Job_Postings_Model The model for database interactions.
+	 */
+	private Job_Postings_Model $model;
+
+	/**
 	 * Initializes the Class
 	 */
 	public function __construct() {
 		add_action( 'rest_api_init', array( $this, 'register_routes' ) );
+
+		// Initialize the model
+		$this->model = Job_Postings_Model::get_instance();
 	}
 
 	/**
@@ -47,27 +60,14 @@ class Job_Postings_API {
 	 * @return array
 	 */
 	public function insert_job_posting( $data ) {
-		global $wpdb;
-		$table_name      = $wpdb->prefix . 'job_postings';
-		$job_title       = sanitize_text_field( $data['job_title'] );
-		$job_description = sanitize_textarea_field( $data['job_description'] );
 
-		if ( empty( $job_title ) || empty( $job_description ) ) {
-			return array(
-				'success' => false,
-				'message' => "Job title or description can't be empty",
-			);
-		}
-		$wpdb->insert(
-			$table_name,
-			array(
-				'job_title'       => $job_title,
-				'job_description' => $job_description,
-			)
-		);
+		$result = $this->model->insert_job_posting( $data['job_title'], $data['job_description'] );
+
 		return array(
-			'success' => true,
-			'message' => 'Job posting inserted successfully.',
+			'success' => $result > 0,
+			'message' => ( $result > 0 ) ?
+				'Job posting inserted successfully.' :
+				'There was an error in creating the job posting', // @TODO: create a function to describe the errors thrown by the model
 		);
 	}
 
@@ -79,11 +79,9 @@ class Job_Postings_API {
 	 * @return array|object|stdClass[]|string[]
 	 */
 	public function select_job_postings( $data ) {
-		global $wpdb;
-		$table_name   = $wpdb->prefix . 'job_postings';
-		$search_term  = isset( $data['search'] ) ? sanitize_text_field( $data['search'] ) : '';
-		$where_clause = $search_term ? "WHERE job_title LIKE '%$search_term%' OR job_description LIKE '%$search_term%'" : '';
-		$results      = $wpdb->get_results( "SELECT * FROM $table_name $where_clause", ARRAY_A );
+
+		$results = $this->model->get_job_postings( $data['search'] );
+
 		if ( $results ) {
 			return $results;
 		} else {

@@ -1,0 +1,18 @@
+#job-postings-container {
+    opacity: 1;
+}
+
+#job-postings-container.loading {
+    opacity: 0.3;
+}
+
+#job-postings-form,
+#job-postings-form label {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+}
+
+#job-postings-form {
+    gap: 1em;
+}
